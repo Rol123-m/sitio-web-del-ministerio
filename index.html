@@ -8,6 +8,7 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -33,23 +34,35 @@
             overflow-x: hidden;
         }
 
+        /* Efecto de partículas de fondo */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(58, 255, 68, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .typewriter-container {
+            overflow: hidden;
+        }
+
         .typewriter {
+            display: inline-block;
+            overflow: hidden;
             border-right: 3px solid var(--verde-neon);
             white-space: nowrap;
-            overflow: hidden;
             font-size: 4rem;
             letter-spacing: 2px;
-            animation: typing 3s steps(20), blink-caret 0.5s step-end infinite;
-        }
-
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-
-        @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: var(--verde-neon) }
         }
 
         header {
@@ -64,11 +77,15 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+            transform: translateY(-100%);
+            opacity: 0;
         }
 
         .logo {
             width: 120px;
             filter: drop-shadow(0 0 10px var(--verde-neon));
+            transform: scale(0.8);
+            opacity: 0;
         }
 
         .menu {
@@ -83,7 +100,9 @@
             padding: 0.5rem 1rem;
             border-radius: 8px;
             position: relative;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(20px);
+            opacity: 0;
         }
 
         .menu a::after {
@@ -94,11 +113,16 @@
             width: 0;
             height: 2px;
             background: var(--verde-neon);
-            transition: width 0.3s;
+            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .menu a:hover::after {
             width: 100%;
+        }
+
+        .menu a:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 0 10px rgba(58, 255, 68, 0.7);
         }
 
         .seccion {
@@ -109,17 +133,14 @@
             justify-content: center;
             opacity: 0;
             transform: translateY(50px);
-            transition: all 1s;
-        }
-
-        .seccion.activa {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .contenido-seccion {
             max-width: 1200px;
             margin: 0 auto;
+            transform-style: preserve-3d;
+            width: 100%;
+            padding: 0 1rem;
         }
 
         .tarjeta {
@@ -129,6 +150,15 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(58,255,68,0.2);
             margin: 2rem 0;
+            transform: perspective(1000px) rotateX(5deg);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+        }
+
+        .tarjeta:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+            box-shadow: 0 15px 40px rgba(58, 255, 68, 0.2);
         }
 
         .equipo-grid {
@@ -142,16 +172,20 @@
             background: rgba(255,255,255,0.05);
             padding: 2rem;
             border-radius: 20px;
-            height: 400px;
+            min-height: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.5s;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.95);
+            opacity: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .miembro-equipo:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 0 30px rgba(58,255,68,0.2);
+            transform: translateY(-15px) scale(1.03) !important;
+            box-shadow: 0 20px 40px rgba(58,255,68,0.3);
+            z-index: 10;
         }
 
         .miembro-equipo img {
@@ -161,6 +195,14 @@
             object-fit: cover;
             margin-bottom: 1.5rem;
             border: 2px solid var(--verde-neon);
+            transition: all 0.5s ease;
+            filter: grayscale(20%);
+        }
+
+        .miembro-equipo:hover img {
+            filter: grayscale(0%);
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(58, 255, 68, 0.5);
         }
 
         .progreso {
@@ -169,13 +211,35 @@
             border-radius: 10px;
             overflow: hidden;
             margin: 2rem 0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .barra-progreso {
             height: 100%;
             background: linear-gradient(90deg, var(--verde-neon), var(--dorado));
-            width: 75%;
-            transition: width 1s;
+            width: 0;
+            transition: width 1.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .barra-progreso::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                            transparent, 
+                            rgba(255,255,255,0.4), 
+                            transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* ESTILOS PARA TESTIMONIOS */
@@ -185,6 +249,24 @@
             position: relative;
             background: var(--azul-oscuro);
             color: var(--gris-claro);
+            overflow: hidden;
+        }
+
+        #testimonios::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(58,255,68,0.03) 0%, rgba(10,26,47,0) 70%);
+            z-index: -1;
+            animation: rotate 60s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .testimonios-container {
@@ -193,6 +275,7 @@
             gap: 2rem;
             margin: 4rem auto;
             max-width: 1200px;
+            perspective: 1000px;
         }
 
         .testimonio-card {
@@ -207,14 +290,16 @@
             text-align: center;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(58,255,68,0.2);
-            transition: all 0.3s ease;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(50px) rotateY(20deg);
             opacity: 0;
-            transform: translateY(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .testimonio-card.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .testimonio-card:hover {
+            transform: translateY(-10px) rotateY(0deg) scale(1.03) !important;
+            box-shadow: 0 20px 40px rgba(58,255,68,0.3);
+            border-color: rgba(58,255,68,0.6);
         }
 
         .testimonio-card img {
@@ -224,24 +309,47 @@
             object-fit: cover;
             margin-bottom: 1.5rem;
             border: 2px solid var(--verde-neon);
+            box-shadow: 0 0 20px rgba(58,255,68,0.3);
+            transition: all 0.4s ease;
+        }
+
+        .testimonio-card:hover img {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(58,255,68,0.5);
         }
 
         .testimonio-card p {
             font-size: 1rem;
             line-height: 1.6;
             margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .testimonio-card p::before,
+        .testimonio-card p::after {
+            content: '"';
+            font-size: 2rem;
+            color: var(--verde-neon);
+            opacity: 0.3;
+            position: absolute;
+        }
+
+        .testimonio-card p::before {
+            top: -15px;
+            left: -10px;
+        }
+
+        .testimonio-card p::after {
+            bottom: -25px;
+            right: -10px;
         }
 
         .testimonio-card h4 {
             color: var(--verde-neon);
             font-size: 1.1rem;
             margin-top: auto;
-        }
-
-        .testimonio-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 10px 25px rgba(58,255,68,0.2);
-            border-color: rgba(58,255,68,0.4);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(58,255,68,0.3);
         }
 
         /* Estilos para el mapa de misiones */
@@ -253,6 +361,14 @@
             margin: 2rem 0;
             position: relative;
             overflow: hidden;
+            transform: perspective(1000px) rotateX(10deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .mapa-misiones:hover {
+            transform: perspective(1000px) rotateX(0deg);
         }
 
         .mapa-misiones::after {
@@ -271,23 +387,39 @@
             height: 20px;
             background: var(--verde-neon);
             border-radius: 50%;
-            animation: pulso 2s infinite;
+            animation: pulso 2s infinite, float 3s ease-in-out infinite alternate;
+            transform: scale(0);
+            box-shadow: 0 0 0 0 rgba(58,255,68,0.7);
         }
 
         @keyframes pulso {
-            0% { box-shadow: 0 0 0 0 rgba(58,255,68,0.4); }
+            0% { box-shadow: 0 0 0 0 rgba(58,255,68,0.7); }
             70% { box-shadow: 0 0 0 15px rgba(58,255,68,0); }
             100% { box-shadow: 0 0 0 0 rgba(58,255,68,0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-10px) scale(1.1); }
         }
 
         /* Estilos para el formulario de contacto */
         .formulario-contacto {
             max-width: 600px;
             margin: 0 auto;
+            transform: perspective(1000px) rotateY(-10deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .formulario-contacto:hover {
+            transform: perspective(1000px) rotateY(0deg);
         }
 
         .input-grupo {
             margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
         }
 
         input, textarea {
@@ -297,12 +429,30 @@
             border: 1px solid var(--verde-neon);
             border-radius: 10px;
             color: var(--gris-claro);
-            transition: all 0.3s;
+            transition: all 0.4s ease;
+            transform: translateY(0);
         }
 
         input:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 15px rgba(58,255,68,0.2);
+            box-shadow: 0 0 20px rgba(58,255,68,0.3);
+            transform: translateY(-3px);
+        }
+
+        .input-grupo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--verde-neon);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        .input-grupo:focus-within::after {
+            transform: translateX(0);
         }
 
         .btn-enviar {
@@ -313,11 +463,81 @@
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(58,255,68,0.3);
         }
 
         .btn-enviar:hover {
-            transform: scale(1.05);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(58,255,68,0.5);
+        }
+
+        .btn-enviar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-enviar:hover::after {
+            transform: translateX(100%);
+        }
+
+        /* Estilos para los iconos de estadísticas */
+        .stats-icon {
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(0) rotate(0deg);
+            opacity: 0;
+        }
+
+        .stats-icon:hover {
+            transform: translateY(-10px) rotate(10deg);
+            filter: drop-shadow(0 0 10px var(--dorado));
+        }
+
+        /* Botón de menú móvil */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gris-claro);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        /* Media Queries para responsividad */
+        @media (max-width: 1200px) {
+            .contenido-seccion {
+                padding: 0 2rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .typewriter {
+                font-size: 3rem;
+            }
+            
+            .seccion {
+                padding: 8rem 1.5rem;
+            }
+            
+            .tarjeta {
+                padding: 1.5rem;
+            }
+            
+            .miembro-equipo {
+                min-height: 380px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -331,14 +551,22 @@
                 flex-direction: column;
                 padding: 2rem;
                 text-align: center;
+                gap: 1rem;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             }
 
             .menu.active {
                 display: flex;
             }
 
+            .menu-toggle {
+                display: block;
+            }
+
             .typewriter {
                 font-size: 2.5rem;
+                white-space: normal;
+                border-right: none;
             }
 
             .testimonios-container {
@@ -348,13 +576,100 @@
             #testimonios {
                 padding: 6rem 1rem;
             }
+            
+            .seccion {
+                padding: 6rem 1rem;
+            }
+            
+            /* Ajustes para las tarjetas con grid de 2 columnas */
+            .tarjeta > div[style*="grid-template-columns: repeat(2,1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem;
+            }
+            
+            /* Ajustes para las estadísticas */
+            .tarjeta > div[style*="grid-template-columns: repeat(3,1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 2rem;
+            }
+            
+            /* Ajustes para el formulario de contacto */
+            .tarjeta > div[style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 2rem;
+            }
+            
+            .mapa-misiones {
+                height: 300px;
+            }
+            
+            .miembro-equipo {
+                min-height: auto;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .typewriter {
+                font-size: 2rem;
+            }
+            
+            .logo {
+                width: 100px;
+            }
+            
+            .seccion {
+                padding: 5rem 1rem;
+            }
+            
+            .tarjeta {
+                padding: 1rem;
+            }
+            
+            .contenido-seccion h2 {
+                font-size: 2rem !important;
+            }
+            
+            /* Ajustes para las tarjetas con grid de 3 columnas (misiones) */
+            .tarjeta > div[style*="grid-template-columns: repeat(3,1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem;
+            }
+            
+            .miembro-equipo img {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .mapa-misiones {
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .typewriter {
+                font-size: 1.8rem;
+            }
+            
+            .seccion {
+                padding: 4rem 0.5rem;
+            }
+            
+            .contenido-seccion h2 {
+                font-size: 1.8rem !important;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles-js"></div>
+    
     <header>
         <img src="https://i.postimg.cc/wMJ2bCgV/mas-logos.jpg" alt="Logo" class="logo">
-        <nav class="menu">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <nav class="menu" id="mainMenu">
             <a href="#inicio">Inicio</a>
             <a href="#educacion">Educación</a>
             <a href="#evangelismo">Evangelismo</a>
@@ -365,26 +680,28 @@
         </nav>
     </header>
 
-    <section id="inicio" class="seccion activa">
+    <section id="inicio" class="seccion">
         <div class="contenido-seccion">
-            <h1 class="typewriter">VIVOS PARA SERVIR</h1>
+            <div class="typewriter-container">
+                <h1 class="typewriter">VIVOS PARA SERVIR</h1>
+            </div>
             <div class="tarjeta" style="margin-top: 4rem;">
                 <p style="font-size: 1.5rem; text-align: center;">
                     "Transformando vidas a través del servicio cristiano integral"
                 </p>
                 <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; margin-top: 4rem;">
                     <div style="text-align: center;">
-                        <i class="fas fa-hands-helping" style="color: var(--dorado); font-size: 2.5rem;"></i>
+                        <i class="fas fa-hands-helping stats-icon" style="color: var(--dorado); font-size: 2.5rem;"></i>
                         <h3 style="margin: 1rem 0;">+5,000 Horas</h3>
                         <p>De servicio comunitario anual</p>
                     </div>
                     <div style="text-align: center;">
-                        <i class="fas fa-globe-americas" style="color: var(--dorado); font-size: 2.5rem;"></i>
+                        <i class="fas fa-globe-americas stats-icon" style="color: var(--dorado); font-size: 2.5rem;"></i>
                         <h3 style="margin: 1rem 0;">12 Países</h3>
                         <p>Con presencia misionera activa</p>
                     </div>
                     <div style="text-align: center;">
-                        <i class="fas fa-graduation-cap" style="color: var(--dorado); font-size: 2.5rem;"></i>
+                        <i class="fas fa-graduation-cap stats-icon" style="color: var(--dorado); font-size: 2.5rem;"></i>
                         <h3 style="margin: 1rem 0;">300+ Alumnos</h3>
                         <p>Formados anualmente</p>
                     </div>
@@ -620,83 +937,258 @@
     <script>
         // Inicializar AOS
         AOS.init({
-            duration: 800,
-            once: true
+            duration: 1000,
+            once: true,
+            easing: 'ease-out-back'
+        });
+
+        // Toggle del menú móvil
+        const menuToggle = document.getElementById('menuToggle');
+        const mainMenu = document.getElementById('mainMenu');
+        
+        menuToggle.addEventListener('click', () => {
+            mainMenu.classList.toggle('active');
+            menuToggle.innerHTML = mainMenu.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+        
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mainMenu.classList.remove('active');
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            });
         });
 
         // Animaciones con GSAP
-        gsap.registerPlugin(ScrollTrigger);
+        gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+        // Animación de partículas de fondo
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles-js');
+            const particleCount = window.innerWidth < 768 ? 20 : 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio entre 2px y 6px
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición aleatoria
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Opacidad aleatoria
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Animación flotante
+                gsap.to(particle, {
+                    x: `${Math.random() * 100 - 50}px`,
+                    y: `${Math.random() * 100 - 50}px`,
+                    duration: Math.random() * 20 + 10,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Animación del encabezado
+        gsap.to("header", {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "elastic.out(1, 0.5)"
+        });
+
+        gsap.to(".logo", {
+            scale: 1,
+            opacity: 1,
+            duration: 0.8,
+            delay: 0.3,
+            ease: "back.out(4)"
+        });
+
+        gsap.to(".menu a", {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            delay: 0.5,
+            ease: "back.out(2)"
+        });
+
+        // Animación del título typewriter
+        gsap.to(".typewriter", {
+            text: "VIVOS PARA SERVIR",
+            duration: 3,
+            ease: "none",
+            delay: 0.8
+        });
 
         // Animación para las secciones
         gsap.utils.toArray(".seccion").forEach((section, i) => {
             ScrollTrigger.create({
                 trigger: section,
-                start: "top center",
-                onEnter: () => section.classList.add("activa"),
-                onLeaveBack: () => section.classList.remove("activa")
-            });
-        });
-
-        // Efecto máquina de escribir
-        const titulo = document.querySelector('.typewriter');
-        const textoOriginal = titulo.textContent;
-        titulo.textContent = '';
-        
-        let index = 0;
-        function escribir() {
-            titulo.textContent += textoOriginal[index];
-            index++;
-            if (index < textoOriginal.length) {
-                setTimeout(escribir, 100);
-            }
-        }
-        escribir();
-
-        // Animación puntos de misión
-        gsap.to(".punto-mision", {
-            y: -10,
-            repeat: -1,
-            yoyo: true,
-            duration: 1,
-            ease: "power1.inOut"
-        });
-
-        // Mostrar testimonios cuando son visibles
-        const testimonioCards = document.querySelectorAll('.testimonio-card');
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(section, {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1,
+                        ease: "power3.out"
+                    });
                 }
             });
-        }, { threshold: 0.1 });
-
-        testimonioCards.forEach((card, index) => {
-            observer.observe(card);
-            card.style.transitionDelay = `${index * 0.1}s`;
         });
 
-        // Animación formulario
-        gsap.from(".formulario-contacto", {
-            scrollTrigger: {
-                trigger: ".formulario-contacto",
-                start: "top center"
-            },
-            opacity: 0,
-            x: -50,
-            duration: 1
+        // Animación para las tarjetas
+        gsap.utils.toArray(".tarjeta").forEach((card, i) => {
+            ScrollTrigger.create({
+                trigger: card,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(card, {
+                        opacity: 1,
+                        duration: 1,
+                        ease: "power3.out",
+                        delay: i * 0.1
+                    });
+                }
+            });
         });
 
-        // Animación datos contacto
-        gsap.from(".btn-enviar, .input-grupo", {
-            stagger: 0.2,
-            opacity: 0,
-            y: 20,
-            duration: 1,
-            scrollTrigger: {
-                trigger: ".formulario-contacto"
+        // Animación para los miembros del equipo
+        gsap.utils.toArray(".miembro-equipo").forEach((member, i) => {
+            ScrollTrigger.create({
+                trigger: member,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(member, {
+                        scale: 1,
+                        opacity: 1,
+                        duration: 0.8,
+                        ease: "back.out(2)",
+                        delay: i * 0.15
+                    });
+                }
+            });
+        });
+
+        // Animación para los testimonios
+        gsap.utils.toArray(".testimonio-card").forEach((card, i) => {
+            ScrollTrigger.create({
+                trigger: card,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(card, {
+                        y: 0,
+                        rotationY: 0,
+                        opacity: 1,
+                        duration: 0.8,
+                        ease: "back.out(2)",
+                        delay: i * 0.1
+                    });
+                }
+            });
+        });
+
+        // Animación para el mapa de misiones
+        ScrollTrigger.create({
+            trigger: ".mapa-misiones",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.to(".mapa-misiones", {
+                    rotationX: 0,
+                    opacity: 1,
+                    duration: 1.2,
+                    ease: "back.out(2)"
+                });
+                
+                // Animación de los puntos de misión
+                gsap.to(".punto-mision", {
+                    scale: 1,
+                    duration: 0.8,
+                    stagger: 0.2,
+                    ease: "elastic.out(1, 0.5)"
+                });
             }
+        });
+
+        // Animación para la barra de progreso
+        ScrollTrigger.create({
+            trigger: ".barra-progreso",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.to(".barra-progreso", {
+                    width: "85%",
+                    duration: 2,
+                    ease: "power2.out"
+                });
+            }
+        });
+
+        // Animación para los iconos de estadísticas
+        gsap.utils.toArray(".stats-icon").forEach((icon, i) => {
+            ScrollTrigger.create({
+                trigger: icon,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(icon, {
+                        opacity: 1,
+                        duration: 0.8,
+                        ease: "back.out(2)",
+                        delay: i * 0.2
+                    });
+                }
+            });
+        });
+
+        // Animación para el formulario de contacto
+        ScrollTrigger.create({
+            trigger: ".formulario-contacto",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.to(".formulario-contacto", {
+                    rotationY: 0,
+                    opacity: 1,
+                    duration: 1,
+                    ease: "back.out(2)"
+                });
+                
+                gsap.utils.toArray(".input-grupo input, .input-grupo textarea").forEach((input, i) => {
+                    gsap.to(input, {
+                        y: 0,
+                        opacity: 1,
+                        duration: 0.6,
+                        delay: i * 0.1,
+                        ease: "back.out(2)"
+                    });
+                });
+                
+                gsap.to(".btn-enviar", {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    delay: 0.4,
+                    ease: "back.out(2)"
+                });
+            }
+        });
+
+        // Crear partículas después de que todo esté cargado
+        window.addEventListener('load', createParticles);
+        
+        // Reducir partículas en pantallas pequeñas
+        window.addEventListener('resize', () => {
+            const particlesContainer = document.getElementById('particles-js');
+            particlesContainer.innerHTML = '';
+            createParticles();
         });
     </script>
 </body>
